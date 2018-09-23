@@ -46,8 +46,31 @@ if (navigator.mediaDevices.getUserMedia) {
 * VISUAL STUFF
 */
 
+/*
+* define canvas elements
+*/
 var canvas = document.getElementById("overlay");
 var canvasCtx = canvas.getContext("2d");
+
+/*
+* at the moment this gets a random RGB for the backgroundColor
+* this should be used to define a pallet in the show eventually
+* it will scroll through on peaks
+*/
+function getPalletRgb() {
+  /*var num = Math.round(0xffffff * Math.random());
+  //var r = num >> 16;
+  //var g = num >> 8 & 255;
+  //var b = num & 255;
+  //return 'rgb(' + r + ', ' + g + ', ' + b + ', 0.5)';
+  */
+  var pallet = ["#FFBAD2", "#73C2FB", "#3f93bd", "#4f79bf", "#c2e8ff", "#e2deff", "#8498ff", "#eeaacc", "#ccdddd", "#ffcccc", "#eedddd"];
+  return pallet[Math.floor(Math.random()*pallet.length)]
+}
+
+/*
+* visualize initiates the visual elements of the canvas.
+*/
 
 function visualize() {
   var width = canvas.width;
@@ -70,7 +93,7 @@ function visualize() {
   /*
   * Next, we clear the canvas of what had been drawn on it before to get ready
   * for the new visualization display:
-   */
+  */
   canvasCtx.clearRect(0, 0, width, height);
 
   // We now define the draw() function:
@@ -117,6 +140,8 @@ function visualize() {
     * where the next wave segment should be drawn:
     */
     for (var i = 0; i < bufferLength; i++) {
+      Math.random()
+
 
       var v = dataArray[i] / 128.0;
       var y = v * height / 2;
@@ -125,6 +150,13 @@ function visualize() {
         canvasCtx.moveTo(x, y);
       } else {
         canvasCtx.lineTo(x, y);
+      }
+
+      if (dataArray[i] > 165) {
+        canvasCtx.strokeStyle = getPalletRgb();
+      }
+      if (dataArray[i] > 235) {
+         document.body.style.backgroundColor = getPalletRgb();
       }
 
       x += sliceWidth;

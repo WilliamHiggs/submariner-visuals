@@ -46,8 +46,70 @@ if (navigator.mediaDevices.getUserMedia) {
 * VISUAL STUFF
 */
 
+/*
+* define canvas elements
+*/
 var canvas = document.getElementById("overlay");
 var canvasCtx = canvas.getContext("2d");
+
+/*
+* at the moment this gets a random RGB for the backgroundColor
+* this should be used to define a pallet in the show eventually
+* it will scroll through on peaks
+*/
+function getRandomPallete() {
+  var pallete = ["#F6C89B", "#F6C3D7", "#89CFF0", "#D03737"];
+  return pallete[Math.floor(Math.random()*pallete.length)]
+}
+
+//Average Peak Array - It's naive but its better than a static threshold
+/*
+** You can view this like:
+** RingBuffer MaxLength -> Response time
+** : Bigger array more infomation so slower responce + less peformance
+** minPeak -> threshold
+** : The minimum peak that will be detected and returned to
+** : this should probably be set using a impulse which you
+** : wish to use for visual change.
+** @TODO the dataArray data seems to only go to 255, use PCM data
+** for peak detections 
+*/
+
+/*
+** A simple ring buffer to hold the peakArray data
+** @TODO turn this into a ES6 Class with constuctor and methods
+** @arugments maxLength -> length until the RingBuffer shifts
+*/
+function RingBuffer(maxLength) {
+  this.maxLength = maxLength;
+}
+
+RingBuffer.prototype = Object.create(Array.prototype);
+
+RingBuffer.prototype.push = function(element) {
+  Array.prototype.push.call(this, element);
+  while (this.length > this.maxLength) {
+    this.shift();
+  }
+}
+
+//simple mean calculation function
+const average = arr => arr.reduce((a,b) => a + b) / arr.length;
+
+//a max peak can be introduced for nasty high impulse spikes
+var maxPeak = 255;
+//the number at which the detection will kick in. Between 200-255 i've found works
+var minPeak = 253;
+var threshold = minPeak;
+//empty array to hold a list of peaks over threshold
+var peakArray = new RingBuffer(128);
+//fill our peakArray to start with a flat average
+peakArray.forEach(x => x = minPeak);
+
+
+/*
+* visualize initiates the visual elements of the canvas.
+*/
 
 function visualize() {
   var width = canvas.width;
@@ -70,7 +132,7 @@ function visualize() {
   /*
   * Next, we clear the canvas of what had been drawn on it before to get ready
   * for the new visualization display:
-   */
+  */
   canvasCtx.clearRect(0, 0, width, height);
 
   // We now define the draw() function:
@@ -118,6 +180,7 @@ function visualize() {
     */
     for (var i = 0; i < bufferLength; i++) {
 
+      var randomColour = getRandomPallete();
       var v = dataArray[i] / 128.0;
       var y = v * height / 2;
 
@@ -125,6 +188,26 @@ function visualize() {
         canvasCtx.moveTo(x, y);
       } else {
         canvasCtx.lineTo(x, y);
+      }
+
+      if (dataArray[i] > threshold - 75) {
+        canvasCtx.strokeStyle = randomColour;
+      }
+
+      if (dataArray[i] < maxPeak && dataArray[i] > threshold) {
+        //push current peak to our peakArray
+        peakArray.push(dataArray[i]);
+        //update threshold to represent new peak average (rounded down)
+        threshold = Math.floor(average(peakArray));
+        //random background color
+        document.body.style.backgroundColor = randomColour;
+        console.log(threshold);
+      } else {
+        /*
+        ** if there is no peak the threshold can gently decrease
+        ** the slower the decrement the longer the threshold is held for
+        */
+        if (threshold > minPeak) threshold = threshold - 0.01;
       }
 
       x += sliceWidth;

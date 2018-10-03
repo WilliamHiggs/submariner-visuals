@@ -57,16 +57,55 @@ var canvasCtx = canvas.getContext("2d");
 * this should be used to define a pallet in the show eventually
 * it will scroll through on peaks
 */
-function getPalletRgb() {
-  /*var num = Math.round(0xffffff * Math.random());
-  //var r = num >> 16;
-  //var g = num >> 8 & 255;
-  //var b = num & 255;
-  //return 'rgb(' + r + ', ' + g + ', ' + b + ', 0.5)';
-  */
-  var pallet = ["#FFBAD2", "#73C2FB", "#3f93bd", "#4f79bf", "#c2e8ff", "#e2deff", "#8498ff", "#eeaacc", "#ccdddd", "#ffcccc", "#eedddd"];
-  return pallet[Math.floor(Math.random()*pallet.length)]
+function getRandomPallete() {
+  var pallete = ["#F6C89B", "#F6C3D7", "#89CFF0", "#D03737"];
+  return pallete[Math.floor(Math.random()*pallete.length)]
 }
+
+//Average Peak Array - It's naive but its better than a static threshold
+/*
+** You can view this like:
+** RingBuffer MaxLength -> Response time
+** : Bigger array more infomation so slower responce + less peformance
+** minPeak -> threshold
+** : The minimum peak that will be detected and returned to
+** : this should probably be set using a impulse which you
+** : wish to use for visual change.
+** @TODO the dataArray data seems to only go to 255, use PCM data
+** for peak detections 
+*/
+
+/*
+** A simple ring buffer to hold the peakArray data
+** @TODO turn this into a ES6 Class with constuctor and methods
+** @arugments maxLength -> length until the RingBuffer shifts
+*/
+function RingBuffer(maxLength) {
+  this.maxLength = maxLength;
+}
+
+RingBuffer.prototype = Object.create(Array.prototype);
+
+RingBuffer.prototype.push = function(element) {
+  Array.prototype.push.call(this, element);
+  while (this.length > this.maxLength) {
+    this.shift();
+  }
+}
+
+//simple mean calculation function
+const average = arr => arr.reduce((a,b) => a + b) / arr.length;
+
+//a max peak can be introduced for nasty high impulse spikes
+var maxPeak = 255;
+//the number at which the detection will kick in. Between 200-255 i've found works
+var minPeak = 253;
+var threshold = minPeak;
+//empty array to hold a list of peaks over threshold
+var peakArray = new RingBuffer(128);
+//fill our peakArray to start with a flat average
+peakArray.forEach(x => x = minPeak);
+
 
 /*
 * visualize initiates the visual elements of the canvas.
@@ -140,9 +179,8 @@ function visualize() {
     * where the next wave segment should be drawn:
     */
     for (var i = 0; i < bufferLength; i++) {
-      Math.random()
 
-
+      var randomColour = getRandomPallete();
       var v = dataArray[i] / 128.0;
       var y = v * height / 2;
 
@@ -152,11 +190,24 @@ function visualize() {
         canvasCtx.lineTo(x, y);
       }
 
-      if (dataArray[i] > 165) {
-        canvasCtx.strokeStyle = getPalletRgb();
+      if (dataArray[i] > threshold - 75) {
+        canvasCtx.strokeStyle = randomColour;
       }
-      if (dataArray[i] > 235) {
-         document.body.style.backgroundColor = getPalletRgb();
+
+      if (dataArray[i] < maxPeak && dataArray[i] > threshold) {
+        //push current peak to our peakArray
+        peakArray.push(dataArray[i]);
+        //update threshold to represent new peak average (rounded down)
+        threshold = Math.floor(average(peakArray));
+        //random background color
+        document.body.style.backgroundColor = randomColour;
+        console.log(threshold);
+      } else {
+        /*
+        ** if there is no peak the threshold can gently decrease
+        ** the slower the decrement the longer the threshold is held for
+        */
+        if (threshold > minPeak) threshold = threshold - 0.01;
       }
 
       x += sliceWidth;

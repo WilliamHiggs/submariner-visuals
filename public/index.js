@@ -17,8 +17,8 @@ var stream;
 */
 var analyser = audioCtx.createAnalyser();
 analyser.minDecibels = -90;
-analyser.maxDecibels = -10;
-analyser.smoothingTimeConstant = 0.85;
+analyser.maxDecibels = -5;
+analyser.smoothingTimeConstant = 0.9;
 
 if (navigator.mediaDevices.getUserMedia) {
   console.log('getUserMedia supported.');
@@ -72,7 +72,7 @@ function getRandomPallete() {
 ** : this should probably be set using a impulse which you
 ** : wish to use for visual change.
 ** @TODO the dataArray data seems to only go to 255, use PCM data
-** for peak detections 
+** for peak detections
 */
 
 /*
@@ -96,10 +96,11 @@ RingBuffer.prototype.push = function(element) {
 //simple mean calculation function
 const average = arr => arr.reduce((a,b) => a + b) / arr.length;
 
-//a max peak can be introduced for nasty high impulse spikes
+//a max peak can be introduced for nasty high impulse spikes. It's curently set
+//to the maximum time domain data (255). No value will be higher than this anyway
 var maxPeak = 255;
 //the number at which the detection will kick in. Between 200-255 i've found works
-var minPeak = 253;
+var minPeak = 240;
 var threshold = minPeak;
 //empty array to hold a list of peaks over threshold
 var peakArray = new RingBuffer(128);

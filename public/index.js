@@ -10,6 +10,7 @@
 var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 var source;
 var stream;
+var overlay_video = document.getElementById("overlay_video");
 
 /*
 * Analyser node for visuals
@@ -161,6 +162,8 @@ function visualize() {
     canvasCtx.strokeStyle = 'rgb(0, 0, 0)';
     canvasCtx.beginPath();
 
+    overlay_video.style.filter = "opacity(0%)";
+
     /*
     * Determine the width of each segment of the line to be drawn
     * by dividing the canvas width by the array length
@@ -202,6 +205,9 @@ function visualize() {
         threshold = Math.floor(average(peakArray));
         //random background color
         document.body.style.backgroundColor = randomColour;
+        //show glitched video
+        overlay_video.style.filter = "opacity(50%)";
+
         console.log(threshold);
       } else {
         /*

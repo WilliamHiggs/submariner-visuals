@@ -12,8 +12,8 @@ fs.readdir("./media", (err, files) => {
   }
 });
 */
-
-var videoSource = ["IMG_1655.MOV", "IMG_1656.MOV", "IMG_1658.MOV", "IMG_1746.MOV", "IMG_1800.MOV", "IMG_1807.MOV", "IMG_1812.MOV", "IMG_1815.MOV", "IMG_1816.MOV", "IMG_1844.MOV", "IMG_1846.MOV", "IMG_1855.MOV", "IMG_1856.MOV", "IMG_1861.MOV", "IMG_1975.MOV"];
+/*
+var videoSource = ["VapourGlitch.mp4"];
 var videoEl = document.getElementById('background_video');
 var nextSource = videoSource[0];
 var index = 0;
@@ -32,3 +32,4 @@ videoEl.addEventListener('ended', function(e) {
   videoEl.src = "media/" + nextSource;
   videoEl.play();
 });
+*/

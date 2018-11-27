@@ -101,13 +101,12 @@ const average = arr => arr.reduce((a,b) => a + b) / arr.length;
 //to the maximum time domain data (255). No value will be higher than this anyway
 var maxPeak = 255;
 //the number at which the detection will kick in. Between 200-255 i've found works
-var minPeak = 240;
+var minPeak = 245;
 var threshold = minPeak;
 //empty array to hold a list of peaks over threshold
 var peakArray = new RingBuffer(128);
 //fill our peakArray to start with a flat average
 peakArray.forEach(x => x = minPeak);
-
 
 /*
 * visualize initiates the visual elements of the canvas.
@@ -206,9 +205,8 @@ function visualize() {
         //random background color
         document.body.style.backgroundColor = randomColour;
         //show glitched video
-        overlay_video.style.filter = "opacity(50%)";
+        overlay_video.style.filter = "opacity(100%)";
 
-        console.log(threshold);
       } else {
         /*
         ** if there is no peak the threshold can gently decrease

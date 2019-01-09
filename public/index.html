@@ -9,12 +9,15 @@
 </head>
 
 <body>
+	<video autoplay loop muted id="background_video" src="./media/vapourGlitch.mp4" type="video/mp4"></video>
+	<video autoplay loop muted id="overlay_video" src="./media/VapourGlitchedOut.mp4" type="video/mp4"></video>
 	<div class="outsideWrapper">
 		<div class="insideWrapper">
       <img class="coveredImage" src="thinLogo.png" width="200" height="100" />
 			<canvas class="coveringCanvas" id="overlay" width="200" height="100"></canvas>
 		</div>
 	</div>
+	<script src="backgroundVideo.js"></script>
 	<script src="index.js"></script>
 </body>
 

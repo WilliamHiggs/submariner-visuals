@@ -10,13 +10,14 @@
 var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 var source;
 var stream;
+var overlay_video = document.getElementById("overlay_video");
 
 /*
 * Analyser node for visuals
 * https://developer.mozilla.org/en-US/docs/Web/API/AnalyserNode
 */
 var analyser = audioCtx.createAnalyser();
-analyser.minDecibels = -90;
+analyser.minDecibels = -70;
 analyser.maxDecibels = -5;
 analyser.smoothingTimeConstant = 0.9;
 
@@ -100,13 +101,12 @@ const average = arr => arr.reduce((a,b) => a + b) / arr.length;
 //to the maximum time domain data (255). No value will be higher than this anyway
 var maxPeak = 255;
 //the number at which the detection will kick in. Between 200-255 i've found works
-var minPeak = 240;
+var minPeak = 245;
 var threshold = minPeak;
 //empty array to hold a list of peaks over threshold
 var peakArray = new RingBuffer(128);
 //fill our peakArray to start with a flat average
 peakArray.forEach(x => x = minPeak);
-
 
 /*
 * visualize initiates the visual elements of the canvas.
@@ -161,6 +161,8 @@ function visualize() {
     canvasCtx.strokeStyle = 'rgb(0, 0, 0)';
     canvasCtx.beginPath();
 
+    overlay_video.style.filter = "opacity(0%)";
+
     /*
     * Determine the width of each segment of the line to be drawn
     * by dividing the canvas width by the array length
@@ -202,7 +204,9 @@ function visualize() {
         threshold = Math.floor(average(peakArray));
         //random background color
         document.body.style.backgroundColor = randomColour;
-        console.log(threshold);
+        //show glitched video
+        overlay_video.style.filter = "opacity(100%)";
+
       } else {
         /*
         ** if there is no peak the threshold can gently decrease

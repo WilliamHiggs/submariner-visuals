@@ -17,7 +17,7 @@ var overlay_video = document.getElementById("overlay_video");
 * https://developer.mozilla.org/en-US/docs/Web/API/AnalyserNode
 */
 var analyser = audioCtx.createAnalyser();
-analyser.minDecibels = -90;
+analyser.minDecibels = -70;
 analyser.maxDecibels = -5;
 analyser.smoothingTimeConstant = 0.9;
 
